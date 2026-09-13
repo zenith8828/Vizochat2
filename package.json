@@ -1,0 +1,8 @@
+{
+  "name": "vizochat",
+  "private": true,
+  "scripts": {
+    "build": "npm install --prefix server",
+    "start": "npm --prefix server start"
+  }
+}
