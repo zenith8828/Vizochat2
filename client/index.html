@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>vizochat — Login</title>
+<link rel="stylesheet" href="css/style.css">
+<meta name="google-signin-client_id" content="">
+</head>
+<body>
+<div class="app" style="display:flex; flex-direction:column; min-height:100dvh;">
+  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;">
+    <svg width="86" height="86" viewBox="0 0 100 100" style="filter:drop-shadow(0 0 20px rgba(51,230,255,.55));">
+      <circle cx="30" cy="26" r="9" fill="#33e6ff"/>
+      <circle cx="70" cy="26" r="9" fill="#7b6bff"/>
+      <path d="M20 40 L50 85 L80 40" stroke="url(#g1)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="50" cy="85" r="7" fill="#33e6ff"/>
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#33e6ff"/>
+          <stop offset="1" stop-color="#7b6bff"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <h1 style="margin:18px 0 4px; font-size:28px; font-weight:800; letter-spacing:.5px;">vizo<span style="color:#33e6ff;">chat</span></h1>
+    <p class="muted center" style="max-width:280px; font-size:14px;">Chat. Connect. Earn. Meet new people through live video, every day.</p>
+
+    <div style="width:100%; max-width:320px; margin-top:40px;">
+      <button id="googleBtn" class="btn btn-google">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.4 29.4 35 24 35c-6.1 0-11.3-4.1-13.1-9.6H2.6C5.5 34.7 14 41 24 41c11.6 0 21-9.4 21-21 0-1.5-.2-2.9-.4-4.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.7 18.9 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6-6C34.4 6.5 29.5 4.5 24 4.5 15.6 4.5 8.4 9.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 43.5c5.3 0 10.1-1.8 13.8-4.9l-6.4-5.4C29.3 34.7 26.8 35.5 24 35.5c-5.3 0-9.8-3.6-11.4-8.4l-6.6 5.1C9.8 38.7 16.4 43.5 24 43.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.9 2.4-2.4 4.4-4.4 5.9l6.4 5.4C40.9 36.3 44 30.9 44 24c0-1.5-.2-2.9-.4-3.5z"/></svg>
+        Continue with Google
+      </button>
+      <button id="demoBtn" class="btn btn-outline mt12">Continue with Demo Account</button>
+      <p class="muted center mt16" style="font-size:11.5px;">By continuing you agree to our Terms & Privacy Policy.</p>
+    </div>
+  </div>
+  <p class="footer-note">🛡 Safe • Friendly • Global</p>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  if (Session.isLoggedIn()) window.location.href = '/home.html';
+
+  document.getElementById('demoBtn').addEventListener('click', async () => {
+    try {
+      const data = await api('/api/auth/demo', { method: 'POST' });
+      Session.setToken(data.token);
+      window.location.href = '/home.html';
+    } catch (e) {
+      toast(e.data?.message || 'Demo login unavailable — real Google login is configured.');
+    }
+  });
+
+  // Real Google Sign-In hookup point:
+  // 1. Set GOOGLE_CLIENT_ID in server/.env
+  // 2. Put the same client ID in the meta tag above and load the GSI script:
+  //    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  // 3. Initialize: google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onGoogleResponse })
+  //    then call google.accounts.id.prompt() or attach to googleBtn's click via google.accounts.id.renderButton(...)
+  async function onGoogleResponse(response) {
+    try {
+      const data = await api('/api/auth/google', { method: 'POST', body: { id_token: response.credential } });
+      Session.setToken(data.token);
+      window.location.href = '/home.html';
+    } catch (e) {
+      toast('Google sign-in failed. Please try again.');
+    }
+  }
+  document.getElementById('googleBtn').addEventListener('click', () => {
+    if (window.google && window.google.accounts) {
+      google.accounts.id.prompt();
+    } else {
+      toast('Google Sign-In not configured yet — set GOOGLE_CLIENT_ID in server/.env. Try Demo Account instead.');
+    }
+  });
+</script>
+</body>
+</html>

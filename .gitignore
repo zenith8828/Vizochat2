@@ -1,0 +1,8 @@
+node_modules/
+server/node_modules/
+server/.env
+server/vizochat.db
+server/vizochat.db-shm
+server/vizochat.db-wal
+server/uploads/evidence/*
+.DS_Store
